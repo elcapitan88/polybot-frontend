@@ -134,8 +134,8 @@
                         <tr>
                             <th class="px-4 py-2 text-left">Time</th>
                             <th class="px-4 py-2 text-left">Asset</th>
-                            <th class="px-4 py-2 text-right">UP Ask</th>
-                            <th class="px-4 py-2 text-right">DOWN Ask</th>
+                            <th class="px-4 py-2 text-right">UP Price</th>
+                            <th class="px-4 py-2 text-right">DOWN Price</th>
                             <th class="px-4 py-2 text-right">Combined</th>
                             <th class="px-4 py-2 text-right">Spread %</th>
                             <th class="px-4 py-2 text-right">Duration</th>
@@ -249,11 +249,11 @@
                             <div class="mt-2 grid grid-cols-3 gap-2 text-sm">
                                 <div>
                                     <span class="text-gray-500">UP:</span>
-                                    <span class="font-medium">${formatPrice(o.up_ask)}</span>
+                                    <span class="font-medium">${formatPrice(o.up_price || o.up_ask)}</span>
                                 </div>
                                 <div>
                                     <span class="text-gray-500">DOWN:</span>
-                                    <span class="font-medium">${formatPrice(o.down_ask)}</span>
+                                    <span class="font-medium">${formatPrice(o.down_price || o.down_ask)}</span>
                                 </div>
                                 <div>
                                     <span class="text-gray-500">Combined:</span>
@@ -323,12 +323,12 @@
                             </div>
                             <div class="grid grid-cols-2 gap-2 text-sm mb-2">
                                 <div>
-                                    <div class="text-gray-500 text-xs">UP Ask</div>
-                                    <div class="font-medium">${formatPrice(best.up_ask)}</div>
+                                    <div class="text-gray-500 text-xs">UP Price</div>
+                                    <div class="font-medium">${formatPrice(best.up_price)}</div>
                                 </div>
                                 <div>
-                                    <div class="text-gray-500 text-xs">DOWN Ask</div>
-                                    <div class="font-medium">${formatPrice(best.down_ask)}</div>
+                                    <div class="text-gray-500 text-xs">DOWN Price</div>
+                                    <div class="font-medium">${formatPrice(best.down_price)}</div>
                                 </div>
                             </div>
                             <div class="border-t pt-2">
@@ -373,8 +373,8 @@
                     <tr class="border-b hover:bg-gray-50">
                         <td class="px-4 py-2">${formatTime(o.detected_at)}</td>
                         <td class="px-4 py-2">${assetBadge(o.asset)}</td>
-                        <td class="px-4 py-2 text-right">${formatPrice(o.up_ask)}</td>
-                        <td class="px-4 py-2 text-right">${formatPrice(o.down_ask)}</td>
+                        <td class="px-4 py-2 text-right">${formatPrice(o.up_ask || o.up_price)}</td>
+                        <td class="px-4 py-2 text-right">${formatPrice(o.down_ask || o.down_price)}</td>
                         <td class="px-4 py-2 text-right font-medium text-green-600">${formatPrice(o.combined)}</td>
                         <td class="px-4 py-2 text-right font-bold ${getSpreadColor(o.spread_pct)}">${o.spread_pct?.toFixed(2) || '-'}%</td>
                         <td class="px-4 py-2 text-right">${formatDuration(o.duration_seconds)}</td>

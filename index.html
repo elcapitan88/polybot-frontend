@@ -43,10 +43,19 @@
                 <h1 class="text-3xl font-bold text-gray-800">Polymarket Spread Monitor</h1>
                 <p class="text-gray-500">Delta-Neutral Strategy: Buy UP + DOWN when combined &lt; $1.00</p>
             </div>
-            <div class="flex items-center gap-4">
-                <div id="monitor-status" class="flex items-center gap-2">
-                    <span class="w-3 h-3 rounded-full bg-gray-400"></span>
-                    <span class="text-gray-500">Connecting...</span>
+            <div class="flex items-center gap-6">
+                <!-- Resolution Countdown -->
+                <div class="text-center">
+                    <div class="text-xs text-gray-500 uppercase">Next Resolution</div>
+                    <div id="countdown" class="text-lg font-bold text-blue-600">--:--</div>
+                </div>
+                <!-- Connection Status -->
+                <div class="text-center">
+                    <div id="monitor-status" class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-gray-400"></span>
+                        <span class="text-gray-500">Connecting...</span>
+                    </div>
+                    <div class="text-xs text-gray-400" id="ws-messages">-</div>
                 </div>
                 <div class="text-sm text-gray-500" id="last-update">-</div>
             </div>
@@ -158,6 +167,47 @@
 
         let hourlyChart = null;
 
+        // Calculate next 15-minute resolution time
+        function getNextResolution() {
+            const now = new Date();
+            const minutes = now.getMinutes();
+            const nextQuarter = Math.ceil((minutes + 1) / 15) * 15;
+            const next = new Date(now);
+            if (nextQuarter >= 60) {
+                next.setHours(next.getHours() + 1);
+                next.setMinutes(0);
+            } else {
+                next.setMinutes(nextQuarter);
+            }
+            next.setSeconds(0);
+            next.setMilliseconds(0);
+            return next;
+        }
+
+        // Update countdown display
+        function updateCountdown() {
+            const next = getNextResolution();
+            const now = new Date();
+            const diff = Math.max(0, Math.floor((next - now) / 1000));
+            const mins = Math.floor(diff / 60);
+            const secs = diff % 60;
+            const countdownEl = document.getElementById('countdown');
+            countdownEl.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+
+            // Flash when close to resolution
+            if (diff <= 30) {
+                countdownEl.classList.add('text-red-600', 'animate-pulse');
+                countdownEl.classList.remove('text-blue-600');
+            } else {
+                countdownEl.classList.remove('text-red-600', 'animate-pulse');
+                countdownEl.classList.add('text-blue-600');
+            }
+        }
+
+        // Start countdown timer
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
         // Format timestamp
         function formatTime(isoString) {
             if (!isoString) return '-';
@@ -212,10 +262,14 @@
                 // Monitor status
                 const statusEl = document.getElementById('monitor-status');
                 if (data.monitor?.connected) {
-                    statusEl.innerHTML = '<span class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></span><span class="text-green-600">Connected</span>';
+                    statusEl.innerHTML = '<span class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></span><span class="text-green-600">WebSocket Live</span>';
                 } else {
                     statusEl.innerHTML = '<span class="w-3 h-3 rounded-full bg-yellow-500"></span><span class="text-yellow-600">Connecting...</span>';
                 }
+
+                // WebSocket message count
+                const msgCount = data.monitor?.messages_received || 0;
+                document.getElementById('ws-messages').textContent = msgCount > 0 ? `${msgCount.toLocaleString()} msgs` : '-';
 
                 // Stats
                 document.getElementById('stat-markets').textContent = data.monitor?.markets_tracked || '-';
@@ -494,17 +548,17 @@
         // Initial load
         refreshData();
 
-        // Auto-refresh every 2 seconds for live data
+        // Auto-refresh every 1 second for real-time WebSocket data
         setInterval(() => {
             loadSpreads();
             loadSummary();
-        }, 2000);
+        }, 1000);
 
-        // Refresh opportunities and chart less frequently
+        // Refresh opportunities and chart every 10 seconds
         setInterval(() => {
             loadOpportunities();
             loadHourlyChart();
-        }, 30000);
+        }, 10000);
     </script>
 </body>
 </html>
